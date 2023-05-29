@@ -27,12 +27,12 @@ func InitRoutes(e *echo.Echo) {
 
 	userController := controllers.InitUserController(&jwtConfig)
 
-	auth := e.Group("/api/v1/auth", echojwt.WithConfig(authMiddlewareConfig))
+	auth := e.Group("/api/v1/auth")
 
 	auth.POST("/register", userController.Register)
 	auth.POST("/login", userController.Login)
 
-	users := e.Group("/api/v1/users")
+	users := e.Group("/api/v1/users", echojwt.WithConfig(authMiddlewareConfig))
 
 	users.GET("/me", userController.GetUser)
 }
