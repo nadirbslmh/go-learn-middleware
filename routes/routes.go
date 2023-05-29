@@ -2,16 +2,32 @@ package routes
 
 import (
 	"go-learn-middleware/controllers"
+	"go-learn-middleware/middlewares"
+	"go-learn-middleware/utils"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
 func InitRoutes(e *echo.Echo) {
-	//TODO: add logging and jwt middlewares
+	loggerConfig := middlewares.LoggerConfig{
+		Format: "[${time_rfc3339}] ${status} ${method} ${host} ${path} ${latency_human}" + "\n",
+	}
 
-	userController := controllers.InitUserController()
+	loggerMiddleware := loggerConfig.Init()
 
-	auth := e.Group("/api/v1/auth")
+	e.Use(loggerMiddleware)
+
+	jwtConfig := middlewares.JWTConfig{
+		SecretKey:       utils.GetConfig("JWT_SECRET_KEY"),
+		ExpiresDuration: 1,
+	}
+
+	authMiddlewareConfig := jwtConfig.Init()
+
+	userController := controllers.InitUserController(&jwtConfig)
+
+	auth := e.Group("/api/v1/auth", echojwt.WithConfig(authMiddlewareConfig))
 
 	auth.POST("/register", userController.Register)
 	auth.POST("/login", userController.Login)

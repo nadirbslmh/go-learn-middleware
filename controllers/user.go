@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"go-learn-middleware/middlewares"
 	"go-learn-middleware/services"
 
 	"github.com/labstack/echo/v4"
@@ -10,9 +11,9 @@ type UserController struct {
 	service services.UserService
 }
 
-func InitUserController() UserController {
+func InitUserController(jwtAuth *middlewares.JWTConfig) UserController {
 	return UserController{
-		service: services.InitUserService(),
+		service: services.InitUserService(jwtAuth),
 	}
 }
 
