@@ -4,9 +4,11 @@ import (
 	"go-learn-middleware/controllers"
 	"go-learn-middleware/middlewares"
 	"go-learn-middleware/utils"
+	"time"
 
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func InitRoutes(e *echo.Echo) {
@@ -17,6 +19,16 @@ func InitRoutes(e *echo.Echo) {
 	loggerMiddleware := loggerConfig.Init()
 
 	e.Use(loggerMiddleware)
+
+	e.Use(middleware.Recover())
+
+	config := middleware.RateLimiterMemoryStoreConfig{
+		Rate:      10,
+		Burst:     30,
+		ExpiresIn: 3 * time.Minute,
+	}
+
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStoreWithConfig(config)))
 
 	jwtConfig := middlewares.JWTConfig{
 		SecretKey:       utils.GetConfig("JWT_SECRET_KEY"),
