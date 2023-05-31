@@ -22,13 +22,15 @@ func InitRoutes(e *echo.Echo) {
 
 	e.Use(middleware.Recover())
 
-	config := middleware.RateLimiterMemoryStoreConfig{
+	rateLimiterConfig := middlewares.RateLimiterConfig{
 		Rate:      10,
 		Burst:     30,
 		ExpiresIn: 3 * time.Minute,
 	}
 
-	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStoreWithConfig(config)))
+	rateLimiterMiddleware := rateLimiterConfig.Init()
+
+	e.Use(rateLimiterMiddleware)
 
 	jwtConfig := middlewares.JWTConfig{
 		SecretKey:       utils.GetConfig("JWT_SECRET_KEY"),
